@@ -1,0 +1,269 @@
+exports.registerPGD = function(req, res) {
+
+
+    // connection.beginTransaction(async (err)=>{
+    //     if(err)
+    //     {
+    //         console.log(err);
+    //         return null;
+    //     }
+
+    (async function() {
+        let password = bcrypt.hashSync("'" + req.body.password + "'", salt);
+        connection.beginTransaction(async(err) => {
+            if (err) {
+                console.log(err);
+                return 'some errr in bgin';
+            }
+
+            //  To store the data in to pgd table........
+            insertPgdData = {
+                'id': req.body.id,
+                'company_name': req.body.Company_Name,
+                'country_of_establishment': req.body.Country_of_Establishment,
+                'year_of_incorporation': req.body.Year_of_Incorporation,
+                'registered_office_address': req.body.Registered_office_Address,
+                'principal_office_address': req.body.Principal_Office_Address,
+                'telephone_number': req.body.Telephone_Number,
+                'mobile_number': req.body.Mobile_Number,
+                'email_id': req.body.Email_Address,
+                'fax_number': req.body.Fax_Number,
+                'website': req.body.Website,
+                'business_type': req.body.Business_Type,
+                'business_activity': req.body.Business_Activity,
+                'experience': req.body.Experience,
+                'user_id': req.body.User_id,
+                'created_at': created_at()
+
+            }
+
+            try {
+
+                let pgddata = await query('INSERT INTO pgd SET ?', insertPgdData)
+                console.log('insert into pgd')
+            } catch (error) {
+
+                console.log(error)
+                return connection.rollback()
+            }
+
+
+            //  To store the data in to user table............
+            var custoData = {
+                "id": req.body.id,
+                "email": req.body.Email_Address,
+                "type_id": req.body.type_id,
+                "user_type": req.body.user_type,
+                "role_id": req.body.role_id,
+                "is_super_admin": req.body.is_super_admin,
+                "live_devices": req.body.live_devices,
+                "lastLogin_timestamp": req.body.lastLogin_timestamp,
+                "lastLogin_ip": req.body.lastLogin_ip,
+                "lastLogin_browser": req.body.lastLogin_browser,
+                "password": password,
+                "lastLogin_os": req.body.lastLogin_os,
+                "notification_count": req.body.notification_count,
+                "status": 1,
+            }
+            try {
+                let pgddata = await query('INSERT INTO user SET ?', custoData);
+                console.log('insert into user')
+            } catch (error) {
+                console.log(error)
+
+                return connection.rollback()
+            }
+            //     To Store the data in to trade_references
+
+            let insertTradeData = {
+                'id': req.body.id,
+                'user_id': req.body.User_id,
+                'company_name': req.body.Company_Name,
+                'place_of_business': req.body.place_of_business,
+                'contact_person': req.body.Telephone_Number,
+                'number': req.body.Mobile_Number,
+                'nature_of_business': req.body.nature_of_business,
+                'created_at': created_at(),
+
+            }
+            try {
+                let pgddata = await query('INSERT INTO trade_references SET ?', insertTradeData);
+                console.log('insert into trade_reference')
+            } catch (error) {
+                console.log(error)
+                return connection.rollback()
+            }
+            //  inisert into shareholder table
+            let insertshareholder = {
+                'id': req.body.id,
+                'user_id': req.body.User_id,
+                'name': req.body.name,
+                'residential_address': req.body.residential_address,
+                'passport_no': req.body.passport_no,
+                'registration_no': req.body.registration_no,
+                'nationality': req.body.nationality,
+                'shareholding': req.body.shareholding,
+                'auth_signatory': req.body.auth_signatory,
+                'created_at': created_at(),
+                'updated_at': created_at()
+            }
+            try {
+
+                let pgddata = await query('INSERT INTO  shareholder SET ?', insertshareholder);
+                console.log('insertshareholder')
+            } catch (error) {
+                console.log(error)
+                return connection.rollback()
+            }
+
+            // To add the data into beneficial table .......
+
+            let insertBeneficial = {
+                'id': req.body.id,
+                'user_id': req.body.User_id,
+                'name': req.body.name,
+                'residential_address': req.body.residential_address,
+                'passport_no': req.body.passport_no,
+                'registration_no': req.body.registration_no,
+                'nationality': req.body.nationality,
+                'shareholding': req.body.shareholding,
+                'auth_signatory': req.body.auth_signatory,
+                'created_at': created_at(),
+                'updated_at': null,
+
+            }
+
+            try {
+                let pgddata = await query('INSERT INTO beneficial_owners SET ?', insertBeneficial);
+                console.log('insert into beneficial ')
+            } catch (error) {
+                console.log(error)
+                return connection.rollback()
+            }
+            // insert data into senior mang table
+            let insertseniorMg = {
+                'id': req.body.id,
+                'user_id': req.body.User_id,
+                'name': req.body.name,
+                'residential_address': req.body.residential_address,
+                'passport_no': req.body.passport_no,
+                'registration_no': req.body.registration_no,
+                'nationality': req.body.nationality,
+                'auth_signatory': req.body.auth_signatory,
+                'created_at': created_at(),
+                'updated_at': created_at()
+            }
+            try {
+                let pgddata = await query('INSERT INTO senior_managers SET ?', insertseniorMg);
+                console.log('insert into senior mng')
+            } catch (error) {
+                console.log(error)
+                return connection.rollback()
+            }
+
+
+            // To insert bank details in to bank_detail table
+            let insertBankdetails = {
+                'id': req.body.id,
+                'bank_name': req.body.bank_name,
+                'holder_name': req.body.name,
+                'account_number': req.body.account_number,
+                'ifsc_code': req.body.ifsc_code,
+                'user_id': req.body.User_id,
+                'created_at': created_at(),
+                'updated_at': req.body.updated_at,
+                'status': req.body.status,
+                'bank_branch': req.body.bank_branch,
+                'account_type': req.body.account_type,
+                'upi': req.body.upi,
+                'remark': req.body.remark,
+            }
+            try {
+                let pgddata = await query('INSERT INTO bank_details SET ?', insertBankdetails);
+                console.log('insert into bank_detail')
+            } catch (error) {
+                console.log(error)
+                return connection.rollback()
+            }
+
+            //  To insrt business detail in to business table
+            let insertBusinessDtail = {
+                'id': req.body.id,
+                'user_id': req.body.User_id,
+                'gold': req.body.gold,
+                'silver': req.body.silver,
+                'dilivery_service_by_owner': req.body.dilivery_service_by_owner,
+                'created_at': created_at(),
+                'updated_at': created_at()
+
+            }
+
+            try {
+                let pgddata = await query('INSERT INTO business_details  SET ?', insertBusinessDtail);
+                console.log('insert into business_detail')
+            } catch (error) {
+                console.log(error)
+                return connection.rollback()
+            }
+
+            //  To insert precious detail into  precious table
+
+            let insertPrecious = {
+                'id': req.body.id,
+                'user_id': req.body.User_id,
+                'dore_bars': req.body.dore_bars,
+                'scrap_jewellery_bar': req.body.scrap_jewellery_bar,
+                'semi_refined_bars': req.body.semi_refined_bars,
+                'fine_gold_bars': req.body.fine_gold_bars,
+                'origin_country': req.body.origin_country,
+                'purity': req.body.purity,
+                'quantity_per_delivery': req.body.quantity_per_delivery,
+                'monthly_frequency': req.body.monthly_frequency,
+                'delivery_type': req.body.delivery_type,
+                'created_at': created_at(),
+                'updated_at': created_at()
+
+            }
+            try {
+                let pgddata = await query('INSERT INTO precious_metal  SET ?', insertPrecious);
+                console.log('insert into precious')
+            } catch (error) {
+                console.log(error)
+                return connection.rollback()
+            }
+
+            let insertReqdDoc = {
+                'id': req.body.id,
+                'user_id': req.body.User_id,
+                'account_opening_form': req.body.account_opening_form,
+                'trade_license': req.body.trade_license,
+                'address_proof': req.body.address_proof,
+                'memorandum': req.body.memorandum,
+                'passports': req.body.passports,
+                'audited_financial_statement': req.body.audited_financial_statement,
+                'bank_statement': req.body.bank_statement,
+                'company_auth_letter': req.body.company_auth_letter,
+                'residence_address': req.body.residence_address,
+                'invoice': req.body.invoice,
+                'gold_source': req.body.gold_source
+            }
+
+            try {
+                let pgddata = await query('INSERT INTO reqd_document  SET ?', insertReqdDoc);
+                console.log('insert into required documnets')
+            } catch (error) {
+                console.log(error)
+                return connection.rollback()
+            }
+            connection.commit()
+
+
+
+        })
+    }()) // end function
+
+
+
+
+
+}
